@@ -29,12 +29,15 @@ async function calculateDaoAddr(timelock, voteToken, daoName) {
     [voteToken, timelock, daoName]
   );
   const bytecodeDao = await readTextFile('dao.txt');
-  const bytecode = ethers.concat([bytecodeDao, constructorArgs]);
+  const contractBytecode = ethers.concat([bytecodeDao, constructorArgs]);
 
-  const predictedAddress = ethers.getCreateAddress({
-    from: ethers.ZeroAddress,
-    nonce: salt
-  });
+  const initCodeHash = ethers.keccak256(contractBytecode);
+
+  const predictedAddress = ethers.getCreate2Address(
+    ethers.ZeroAddress,
+    salt,
+    initCodeHash,
+  );
 
   return predictedAddress;
 }
